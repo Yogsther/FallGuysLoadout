@@ -1,0 +1,103 @@
+@font-face {
+    font-family: 'FallGuys';
+    src: url('fonts/Asap-Bold.woff') format('woff');
+
+}
+
+*:root {
+    --site-accent: rgb(255, 36, 65);
+}
+
+* {
+    color: white;
+    font-family: "FallGuys";
+}
+
+*:focus {
+    outline: none;
+}
+
+body {
+    margin: 0;
+    background: rgb(34, 34, 34);
+
+}
+
+canvas {
+    display: block;
+}
+
+canvas:focus {
+    outline: none;
+}
+
+#tab-view {
+    display: block;
+    position: absolute;
+    right: 15px;
+    top: 15px;
+    background-color: rgb(24, 24, 24);
+    height: 80px;
+    width: calc(50% - 15px);
+    border-radius: 15px 15px 0px 0px;
+    overflow: hidden;
+    overflow-x: auto;
+}
+
+.tab-button {
+    display: inline;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    margin-left: 0px;
+    margin-right: 0px;
+    float: left;
+    font-size: 20px;
+    cursor: pointer;
+    height: 50px;
+    width: calc(100% / 4);
+    background: none;
+}
+
+.tab-button:hover {
+    background: rgb(26, 26, 26);
+}
+
+
+.tab-button-selected,
+.tab-button:active {
+    background: rgb(19, 19, 19);
+    color: var(--site-accent);
+}
+
+#search {
+    float: right;
+    margin: 5px;
+    height: 35px;
+    font-size: 20px;
+    color: black;
+}
+
+#config-panel {
+    display: block;
+    position: absolute;
+    right: 15px;
+    bottom: 15px;
+    height: calc(100% - 30px - 50px);
+    width: calc(50% - 15px);
+    background-color: rgb(29, 29, 29);
+    border-radius: 0px 0px 15px 15px;
+    overflow-y: auto;
+}
+
+.color-pick {
+    display: inline-block;
+    width: 100px;
+    height: 100px;
+    border-radius: 15px;
+    overflow: hidden;
+    margin: 10px;
+    margin-bottom: 0px;
+    margin-right: 0px;
+    cursor: pointer;
+}
