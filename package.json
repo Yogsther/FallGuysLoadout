@@ -9,6 +9,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "file-system": "^2.2.2"
+    "canvas": "^2.6.1",
+    "file-system": "^2.2.2",
+    "md5": "^2.3.0"
   }
 }
