@@ -3,9 +3,9 @@ var width = window.innerWidth / 2
 var scene = new THREE.Scene();
 var camera = new THREE.PerspectiveCamera(75, width / window.innerHeight, 0.1, 1000);
 
-camera.position.x = -0.95
-camera.position.y = 1.38
-camera.position.z = 3.29
+camera.position.x = -0.568
+camera.position.y = 1.227
+camera.position.z = 1.969
 
 var order = 1
 
@@ -19,10 +19,9 @@ var renderer = new THREE.WebGLRenderer({
     alpha: true
 });
 
-var selectedPattern = "CaveMan"
-var selectedColor = COLORS["Baby Pink"]
-
-setPattern(selectedPattern, selectedColor)
+/* var selectedPattern = "CaveMan"
+var selectedColor = skin_data.colors["Baby Pink"]
+ */
 
 
 window.onresize = () => {
@@ -50,96 +49,7 @@ var body;
 
 
 
-function hexToRgb(hex) {
-    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result ? {
-        r: parseInt(result[1], 16),
-        g: parseInt(result[2], 16),
-        b: parseInt(result[3], 16)
-    } : null;
-}
-
-function getGradientColor(start_color, end_color, percent) {
-    // strip the leading # if it's there
-    start_color = start_color.replace(/^\s*#|\s*$/g, '');
-    end_color = end_color.replace(/^\s*#|\s*$/g, '');
-
-    // convert 3 char codes --> 6, e.g. `E0F` --> `EE00FF`
-    if (start_color.length == 3) {
-        start_color = start_color.replace(/(.)/g, '$1$1');
-    }
-
-    if (end_color.length == 3) {
-        end_color = end_color.replace(/(.)/g, '$1$1');
-    }
-
-    // get colors
-    var start_red = parseInt(start_color.substr(0, 2), 16),
-        start_green = parseInt(start_color.substr(2, 2), 16),
-        start_blue = parseInt(start_color.substr(4, 2), 16);
-
-    var end_red = parseInt(end_color.substr(0, 2), 16),
-        end_green = parseInt(end_color.substr(2, 2), 16),
-        end_blue = parseInt(end_color.substr(4, 2), 16);
-
-    // calculate new color
-    var diff_red = end_red - start_red;
-    var diff_green = end_green - start_green;
-    var diff_blue = end_blue - start_blue;
-
-    diff_red = ((diff_red * percent) + start_red).toString(16).split('.')[0];
-    diff_green = ((diff_green * percent) + start_green).toString(16).split('.')[0];
-    diff_blue = ((diff_blue * percent) + start_blue).toString(16).split('.')[0];
-
-    // ensure 2 digits by color
-    if (diff_red.length == 1) diff_red = '0' + diff_red
-    if (diff_green.length == 1) diff_green = '0' + diff_green
-    if (diff_blue.length == 1) diff_blue = '0' + diff_blue
-
-    return '#' + diff_red + diff_green + diff_blue;
-}
-
-
-
-
-function setPattern(pattern, color) {
-
-    var patternSize = 1024
-
-    var image = new Image()
-    var canvas = document.createElement("canvas")
-    canvas.width = canvas.height = patternSize
-
-    var ctx = canvas.getContext("2d")
-
-    image.onload = () => {
-        ctx.drawImage(image, 0, 0)
-        var imgData = ctx.getImageData(0, 0, patternSize, patternSize)
-        var data = imgData.data;
-
-
-        for (var y = 0; y < patternSize; y++) {
-            for (var x = 0; x < patternSize; x++) {
-                var index = (x + patternSize * y) * 4;
-
-
-                var amountOfRed = data[index] / 255
-
-                var replacement = getGradientColor(color[0], color[1], amountOfRed)
-                replacement = hexToRgb(replacement)
-
-                data[index + 0] = replacement.r
-                data[index + 1] = replacement.g
-                data[index + 2] = replacement.b
-            }
-        }
-
-
-
-        ctx.putImageData(
-            imgData, 0, 0)
-
-
+/* 
         var map = TextureLoader.load(canvas.toDataURL())
         var material = new THREE.MeshBasicMaterial({
             depthTest: true,
@@ -150,32 +60,178 @@ function setPattern(pattern, color) {
             if (node.isMesh) {
                 node.material = material;
             }
-        })
-    }
-    image.src = `resources/Texture2D/CH_FallGuy_${pattern}_MSK.png`
+    
+    
+        }) */
 
+function generateTexture(pattern_url, face_url) {
+    return new Promise((resolve, reject) => {
+        var canvas = document.createElement("canvas")
+        var ctx = canvas.getContext("2d")
+        canvas.width = canvas.height = 512;
+
+        var ready = false;
+        var pattern = new Image()
+        var face = new Image()
+
+        pattern.src = pattern_url
+        face.src = face_url
+
+        pattern.onload = face.onload = readyUp
+
+        function readyUp() {
+            if (ready) draw()
+            else ready = true;
+        }
+
+        function draw() {
+            ctx.drawImage(pattern, 0, 0, 512, 512)
+            ctx.drawImage(face, 0, 0, 512, 512)
+            resolve(canvas.toDataURL())
+
+        }
+    })
 }
 
+var mixer, mixer3;
+var mixer2
+var top
+
+document.addEventListener("keydown", e => {
+    console.log(e.keyCode)
+    var speed = .01
+    switch (e.keyCode) {
+        case 38:
+            top.position.x += speed
+            break
+        case 40:
+            top.position.x -= speed
+            break;
+        case 37:
+            top.position.y += speed
+            break
+        case 39:
+            top.position.y -= speed
+            break
+        case 65:
+            top.position.z += speed
+            break;
+        case 68:
+            top.position.z -= speed
+            break;
+            /*   case 32:
+                  action.stop()
+                  action2.stop()
+                  break */
+    }
+
+    console.log(top.position)
+})
 
 OBJLoader.load('resources/Mesh/Body.obj', obj => {
 
-    var material = new THREE.MeshBasicMaterial({
-        depthTest: true
+    /* var pattern = TextureLoader.load(`resources/Patterns/1c410105d889f14214b9b47c3b1e0ea3/4c72d232d1a1406e6c26251bbf6c3b25.png`)
+    var face = TextureLoader.load('resources/Faces/0edf85315cdae4b8066ce9584b965844.png') */
+    //var normal = TextureLoader.load(`resources/Texture2D/CH_FallGuy_NM.png`)
+
+    generateTexture('resources/Patterns/1c410105d889f14214b9b47c3b1e0ea3/4c72d232d1a1406e6c26251bbf6c3b25.png', 'resources/Faces/0edf85315cdae4b8066ce9584b965844.png').then(image => {
+
+        var texture = TextureLoader.load(image)
+        FBXLoader.load("resources/Animator/CH_PortalChell_Bottom/CH_PortalChell_Bottom.fbx", scout => {
+            FBXLoader.load("resources/Animator/PB_UI_Character.fbx", character => {
+                FBXLoader.load("resources/Animator/CH_PortalChell_Top/CH_PortalChell_Top.fbx", other => {
+                    character.traverse(function (node) {
+                        if (node instanceof THREE.Mesh) {
+                            node.material.map = texture
+                            node.material.roughness = 5
+                            node.material.envMap /* = mirrorCamera.renderTarget */
+                            node.material.refractionRatio = 1
+                            node.material.normalScale = new THREE.Vector2(1, -1)
+                            node.material.needsUpdate = true;
+                            node.material.shininess = 0x050505
+
+                            /* node.material.polygonOffset = true;
+                            node.material.polygonOffsetFactor = 10; */
+
+                            node.material.flatShading = false
+                            /* 
+                            node.material.wireframe = false */
+                        }
+                    });
+
+
+                    /*  var scale = 1.2 */
+                    /*  scout.scale.y = scale */
+                    ;
+                    /*  other.scale.y = scale */
+
+
+
+
+                    other.traverse(function (node) {
+                        if (node instanceof THREE.Mesh) {
+                            /*   node.material.polygonOffset = true;
+                              node.material.polygonOffsetFactor = -10; */
+
+                            /* 
+                            node.material.wireframe = false */
+                        }
+                    });
+
+
+                    /*  scout.traverse(function (node) {
+                         if (node instanceof THREE.Mesh) {
+                             node.material = material
+                         }
+                     }); */
+
+
+
+                    mixer = new THREE.AnimationMixer(scout)
+                    mixer2 = new THREE.AnimationMixer(character)
+                    mixer3 = new THREE.AnimationMixer(other)
+
+                    top = new THREE.Group()
+
+                    top.add(other)
+                    scene.add(scout)
+                    /* scene.add(top) */
+                    scene.add(character)
+
+                    /* scout.scale.y = 1.5
+                     */
+
+                    /* top.position.y = .4
+                    top.position.z = .02
+                    top.position.x = 0 */
+                    scout.updateMatrix()
+
+                    var animation = 2
+                    console.log(character.animations)
+
+                    window.action = mixer.clipAction(character.animations[animation])
+                    window.action2 = mixer2.clipAction(character.animations[animation])
+                    var action3 = mixer3.clipAction(character.animations[animation])
+                    /* action.play()
+                    action2.play()
+                    action3.play() */
+                })
+
+            })
+
+        })
     })
 
-    obj.traverse(function (node) {
-        if (node.isMesh) {
-            node.material = material;
-        }
-    });
-    obj.renderOrder = 0
 
-    body = obj
-    scene.add(body)
+
+
+
+    /* scene.add(body) */
 })
 
 
-function loadObject(object_location, texture_location, top = true) {
+
+/* function loadObject(object_location, texture_location, top = true) {
     var map = TextureLoader.load(`resources/Texture2D/${texture_location}_AM.png`)
     console.log(`resources/Texture2D/${texture_location}_AM.png`)
     //var normalMap = TextureLoader.load(`resources/Texture2D/${texture_location}_NM.png`)
@@ -187,45 +243,54 @@ function loadObject(object_location, texture_location, top = true) {
 
     /* material.flatShading = false */
 
-    OBJLoader.load('resources/Mesh/' + object_location, obj => {
+/* OBJLoader.load('resources/Mesh/' + object_location, obj => {
 
-        obj.traverse(function (node) {
-            if (node.isMesh) {
-                node.material = material;
-            }
-        });
-
-        obj.renderOrder = 1
-
-        if (top) {
-            scene.remove(UPPER)
-            UPPER = obj
-        } else {
-            scene.remove(LOWER)
-            LOWER = obj;
+    obj.traverse(function (node) {
+        if (node.isMesh) {
+            node.material = material;
         }
+    });
 
-        scene.add(obj)
-    })
-}
+    obj.renderOrder = 1
+
+    if (top) {
+        scene.remove(UPPER)
+        UPPER = obj
+    } else {
+        scene.remove(LOWER)
+        LOWER = obj;
+    }
+
+    scene.add(obj)
+}) */
 
 
 
-var ambientLight = new THREE.AmbientLight(0x404040);
+
+var ambientLight = new THREE.AmbientLight(0x404040, 3.5);
 scene.add(ambientLight);
 
-var directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-scene.add(directionalLight);
+
+/* var directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+scene.add(directionalLight); */
 
 
 
 function animate() {
 
+    var delta = clock.getDelta()
+
+    if (mixer && mixer2 && mixer3) {
+        mixer.update(delta)
+        mixer2.update(delta)
+        mixer3.update(delta)
+
+    }
     controls.update()
 
+    renderer.render(scene, camera);
     requestAnimationFrame(animate);
 
-    renderer.render(scene, camera);
 }
 
 
@@ -234,8 +299,8 @@ animate();
 var tabs = {
     colour: () => {
         var list = []
-        for (let color in COLORS) {
-            color = COLORS[color]
+        for (let color in skin_data.colors) {
+            color = skin_data[color]
 
             let button = document.createElement("div")
             button.classList.add("color-pick")
@@ -248,7 +313,7 @@ var tabs = {
             button.onclick = () => {
                 if (selectedColor == color) return
                 selectedColor = color
-                setPattern(selectedPattern, selectedColor)
+
             }
 
             list.push(button)
@@ -337,7 +402,7 @@ function populateTabs() {
     populateList(tabs.colour())
 }
 
-populateTabs()
+/* populateTabs() */
 
 function populateList(list) {
     var configPanel = document.getElementById("config-panel")
